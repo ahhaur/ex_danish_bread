@@ -1,1 +1,26 @@
-# ex_danish_bread
+# Assignment
+
+## Assignment Information
+**Github API**: [https://docs.github.com/en/free-pro-team@latest/rest](https://docs.github.com/en/free-pro-team@latest/rest)
+
+**Target Repository**: [https://github.com/apache/airflow](https://github.com/apache/airflow)
+
+
+With the data ingested, address the follow queries:
+- For the ingested commits, determine the top 5 committers ranked by count of commits and their number of commits.
+- For the ingested commits, determine the committer with the longest commit streak.
+- For the ingested commits, generate a heatmap of number of commits count by all users by day of the week and by 3 hour blocks.
+
+
+
+**Sample heatmap**：
+
+|        | 00-03 | 03-06 | 06-09 | 09-12 | 12-15 | 15-18 | 18-21 | 21-00 |
+|--------|-------|-------|-------|-------|-------|-------|-------|-------|
+| Mon    |       |       |       |       |       |       |       |       |
+| Tues   |       |       |       |       |       |       |       |       |
+| Wed    |       |       |       |       |       |       |       |       |
+| Thurs  |       |       |       |       |       |       |       |       |
+| Fri    |       |       |       |       |       |       |       |       |
+| Sat    |       |       |       |       |       |       |       |       |
+| Sun    |       |       |       |       |       |       |       |       |
