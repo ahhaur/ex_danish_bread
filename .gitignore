@@ -1,4 +1,4 @@
 *.bat
 __pycache__/
 cmd/
-airflow/logs/*
+docker/logs/*
