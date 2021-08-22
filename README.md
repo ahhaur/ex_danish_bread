@@ -54,3 +54,9 @@ Server: mariadb
 Username / Password: root / S!mpl3P4ssw0rd
 
 Database: edb
+
+
+## Final Solutions
+Please find [my solution](./sql/solutions.sql) in [sql folder](./sql/).
+
+
