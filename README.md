@@ -59,4 +59,6 @@ Database: edb
 ## Final Solutions
 Please find [my solution](./sql/solutions.sql) in [sql folder](./sql/).
 
+For testing purpose, you may use this [dataset](./sql/data.sql)
+
 
