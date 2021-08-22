@@ -123,17 +123,22 @@ class RepoReader:
         for r in res:
             if  skip_duplicate and r['sha'] == sha:
                 continue
+            
+            tmp_author = r.get('author')
+            tmp_commit = r.get('committer')
+            tmp_author_name = r['commit']['author']['name']
+            tmp_commit_name = r['commit']['committer']['name']
 
             retval.append({
                 'sha': r['sha'],
                 'author_date': r['commit']['author']['date'],
-                'author_name': r['commit']['author']['name'],
-                'author_login': r['author']['login'],
-                'author_id': r['author']['id'],
+                'author_name': tmp_author_name,
+                'author_login': tmp_author_name if tmp_author is None else tmp_author['login'],
+                'author_id': 0 if tmp_author is None else tmp_author['id'],
                 'commit_date': r['commit']['committer']['date'],
-                'committer_name': r['commit']['committer']['name'],
-                'committer_login': r['committer']['login'],
-                'committer_id': r['committer']['id'],
+                'committer_name': tmp_commit_name,
+                'committer_login': tmp_commit_name if tmp_commit is None else tmp_commit['login'],
+                'committer_id': 0 if tmp_commit is None else tmp_commit['id'],
                 'message': r['commit']['message'].split('\n', 1)[0]
             })
 
