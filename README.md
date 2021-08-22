@@ -24,3 +24,33 @@ With the data ingested, address the follow queries:
 | Fri    |       |       |       |       |       |       |       |       |
 | Sat    |       |       |       |       |       |       |       |       |
 | Sun    |       |       |       |       |       |       |       |       |
+
+
+# Solution
+
+## Setup Airflow & MariaDB instance in Docker
+
+Start the instance under [docker folder](./docker/).
+```shell
+docker-compose up --build airflow-init & docker-compose up -d
+```
+
+Stop the instance and remove all the image
+```shell
+docker-compose down -v --rmi all
+```
+
+## Run in Airflow
+In browser, open [http://localhost:8080/](http://localhost:8080/).
+
+Username / Password: airflow / airflow
+
+
+## Phpmyadmin for Mariadb
+In browser, open [http://localhost:8081/](http://localhost:8081/).
+
+Server: mariadb
+
+Username / Password: root / S!mpl3P4ssw0rd
+
+Database: edb
