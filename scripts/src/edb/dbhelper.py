@@ -8,7 +8,8 @@ class DbConnector:
             exit(1)
         self._cursor = None
         try:
-            self._conn_db = dbconn.connect(user=config['user'], password=config['pass'], host=config['host'])
+            self._conn_db = dbconn.connect(user=config['user'], password=config['pass'], host=config['host'], use_pure=True, charset='utf8')
+
             _result = self.get_result(f"SHOW DATABASES like '{config['db']}'")
             if len(_result) == 0:
                 self.create_table(config['db'])
@@ -19,6 +20,11 @@ class DbConnector:
         else:
             self._cursor = self._conn_db.cursor()
             self._cursor.execute(f"USE {config['db']};")
+            
+            # Enforce UTF-8 for the connection.
+            self._cursor.execute('SET NAMES utf8mb4')
+            self._cursor.execute("SET CHARACTER SET utf8mb4")
+            self._cursor.execute("SET character_set_connection=utf8mb4")
 
     def check_connection(self):
         return False if self._conn_db is False else True
@@ -26,7 +32,7 @@ class DbConnector:
     def create_table(self, dbname):
         print(f"Create database: {dbname}")
         sql = """
-        CREATE DATABASE IF NOT EXISTS {} DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+        CREATE DATABASE IF NOT EXISTS {} DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
         """.format(dbname)
         self._execute(sql)
 

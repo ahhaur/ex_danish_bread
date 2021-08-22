@@ -15,8 +15,10 @@ class RepoReader:
             exit(1)
 
         self.repo_url = f"{self.API_URL}/repos/{org}/{repo}"
-        start_ts = date.today() + relativedelta(months=-2)
+        start_ts = date.today() + relativedelta(months=-1) if start_date is None else start_date
         self.start_date = start_ts.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        print(f'Start date is {start_ts}')
 
     def main(self):
         print('Getting branches info...')
@@ -82,7 +84,7 @@ class RepoReader:
                 tmp['committer_name'] = commit['committer_name']
                 tmp['commit_date'] = commit['commit_date']
                 tmp['commit_datetime'] = self.convert_timestamp(commit['commit_date'])
-                tmp['message'] = commit['message'].encode('utf-8')  # encode message to prevent funny characters
+                tmp['message'] = commit['message']  #.encode('utf8')
 
                 if conn is not None:
                     retval.append(tuple(tmp.values()))

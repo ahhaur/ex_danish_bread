@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from airflow import DAG
 from airflow.operators.bash import BashOperator
@@ -15,8 +15,9 @@ from src.edb.githelper import RepoReader
 dbconfig = {'user':'root', 'pass':'S!mpl3P4ssw0rd', 'host': 'mariadb', 'db': 'edb'}
 tbl_b = 'branch_table'
 tbl_c = 'commit_table'
+start_date = datetime.strptime("2021-07-20", "%Y-%m-%d")
 myconn = DbConnector(dbconfig)
-gitobj = RepoReader(org='apache', repo='airflow')
+gitobj = RepoReader(org='apache', repo='airflow', start_date=start_date)
 
 def get_branch(ds, **kwargs):
     col = ['name', 'sha']
