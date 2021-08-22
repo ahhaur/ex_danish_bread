@@ -14,7 +14,7 @@ x-airflow-common:
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__API__AUTH_BACKEND: 'airflow.api.auth.backend.basic_auth'
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
-    PYTHONPATH: ${PYTHONPATH:-/opt/airflow/scripts/src}
+    PYTHONPATH: ${PYTHONPATH:-/opt/airflow/scripts}
   volumes:
     - ../scripts/:/opt/airflow/scripts
     - ../dags:/opt/airflow/dags

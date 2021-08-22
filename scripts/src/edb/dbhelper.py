@@ -40,6 +40,7 @@ class DbConnector:
             PRIMARY KEY (branch_id)
             ) ENGINE = InnoDB;
         """.format(dbname)
+
         self._execute(sql)
 
         print(f"Create commit table.")
@@ -48,8 +49,12 @@ class DbConnector:
             commit_id INT UNSIGNED NOT NULL AUTO_INCREMENT , 
             branch_id INT UNSIGNED NOT NULL , 
             commit_sha VARCHAR(64) NOT NULL , 
-            author VARCHAR(100) NOT NULL , 
-            committer VARCHAR(100) NOT NULL , 
+            author_id INT UNSIGNED NOT NULL , 
+            author_login VARCHAR(100) NOT NULL , 
+            author_name VARCHAR(100) NOT NULL , 
+            committer_id INT UNSIGNED NOT NULL , 
+            committer_login VARCHAR(100) NOT NULL , 
+            committer_name VARCHAR(100) NOT NULL , 
             commit_date VARCHAR(20) NOT NULL , 
             commit_datetime DATETIME NOT NULL , 
             message VARCHAR(255) NOT NULL , 
@@ -60,16 +65,46 @@ class DbConnector:
 
         self._execute(sql)
 
-    def insert(self, tbl_name, columns, data):
-        col = ', '.join(columns)
-        val = ', '.join(['%s'*len(columns)])
-        sql = f"INSERT INTO {tbl_name} (name, aaa, bbb) VALUES (%s, %s, %s)"
-
+    def insert_batch(self, tbl_name, columns, data):
+        col = ", ".join(columns)
+        val = ", ".join(['%s']*len(columns))
+        sql = rf"INSERT INTO {tbl_name} ({col}) VALUES ({val})"
         self._cursor.executemany(sql, data)
         self._conn_db.commit()
         print(self._cursor.rowcount, "was inserted.")
 
-    def get_result(self, sql_query, has_header=False):
+    def check_record(self, tbl_name, col, cond):
+        sql = f"select {col} from {tbl_name} where {cond} limit 1"
+        results = self.get_result(sql)
+        return results[0][col] if len(results) == 1 else 0
+
+    def insert(self, tbl_name, columns, data):
+        col = ", ".join(columns)
+        val = ", ".join(['%s']*len(columns))
+        sql = rf"INSERT INTO {tbl_name} ({col}) VALUES ({val})"
+        self._cursor.execute(sql, data)
+        self._conn_db.commit()
+        print("1 record inserted, ID:", self._cursor.lastrowid)
+        return self._cursor.lastrowid
+
+    def get_record(self, sql_query, has_header=True):
+        if not self._execute(sql_query):
+            return False
+        # get column name
+        columns = [column[0] for column in self._cursor.description]
+        row = self._cursor.fetchone()
+        if row is None:
+            return None
+
+        if has_header:
+            retval = {}
+            for i, val in enumerate(row):
+                retval[columns[i]] = val
+        else:
+            retval = list(row)
+        return retval
+
+    def get_result(self, sql_query, has_header=True):
         if not self._execute(sql_query):
             return False
         # get column name

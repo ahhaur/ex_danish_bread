@@ -1,20 +1,21 @@
 import requests
 import time
+import pytz
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 
 class RepoReader:
     API_URL = "https://api.github.com"
     REQ_BUFFER = 90  # request buffer in second
-    PAGE_SIZE = 20  # commit per request
+    PAGE_SIZE = 100  # commit per request
 
-    def __init__(self, org=None, repo=None):
+    def __init__(self, org=None, repo=None, start_date=None):
         if org is None or repo is None:
             print("Org or Repo is not defined.")
             exit(1)
 
         self.repo_url = f"{self.API_URL}/repos/{org}/{repo}"
-        start_ts = date.today() + relativedelta(months=-6)
+        start_ts = date.today() + relativedelta(months=-2)
         self.start_date = start_ts.strftime("%Y-%m-%dT%H:%M:%SZ")
 
     def main(self):
@@ -56,6 +57,55 @@ class RepoReader:
 
         return retval
 
+    # get all commits for branch
+    def get_branch_commit_conn(self, branch_name, branch_sha, conn=None, tpl=None, skip_first=False):
+        self.buffer()
+        print(f'Getting all commits for #{branch_name}...')
+        if conn is not None:
+            col = [_ for _ in tpl]
+        
+        sha = branch_sha
+        commits = self.get_commit(sha=sha, skip_duplicate=skip_first, per_page=self.PAGE_SIZE)
+        retval = []
+        while len(commits) > 0:
+            print("SHA: {} \nTotal record: {}".format(sha, len(commits)))
+            retval = []
+            for commit in commits:
+                sha = commit['sha']
+                tmp = tpl
+                tmp['commit_sha'] = commit['sha']
+                tmp['author_id'] = commit['author_id']
+                tmp['author_login'] = commit['author_login']
+                tmp['author_name'] = commit['author_name']
+                tmp['committer_id'] = commit['committer_id']
+                tmp['committer_login'] = commit['committer_login']
+                tmp['committer_name'] = commit['committer_name']
+                tmp['commit_date'] = commit['commit_date']
+                tmp['commit_datetime'] = self.convert_timestamp(commit['commit_date'])
+                tmp['message'] = commit['message'].encode('utf-8')  # encode message to prevent funny characters
+
+                if conn is not None:
+                    retval.append(tuple(tmp.values()))
+                    print(tmp, "\n", "-"*50)
+                else:
+                    print(tmp, "\n", "-"*50)
+            
+            if conn is not None:
+                conn.insert_batch('commit_table', col, retval)
+            
+            if len(commits) < self.PAGE_SIZE-1:
+                print('Records lesser than expected number, job done.')
+                break
+
+            self.buffer()
+            commits = self.get_commit(sha=sha, skip_duplicate=True, per_page=self.PAGE_SIZE)
+
+        return retval
+
+    def convert_timestamp(self, ts_str):
+        source_format = '%Y-%m-%dT%H:%M:%SZ'
+        insert_format = '%Y-%m-%d %H:%M:%S'
+        return datetime.strptime(ts_str, source_format).replace(tzinfo=pytz.UTC).strftime(insert_format)
 
     # get commit list
     def get_commit(self, sha=None, skip_duplicate=False, per_page=100):
@@ -75,11 +125,15 @@ class RepoReader:
 
             retval.append({
                 'sha': r['sha'],
-                'author': r['commit']['author']['name'],
                 'author_date': r['commit']['author']['date'],
-                'committer': r['commit']['committer']['name'],
+                'author_name': r['commit']['author']['name'],
+                'author_login': r['author']['login'],
+                'author_id': r['author']['id'],
                 'commit_date': r['commit']['committer']['date'],
-                'msg': r['commit']['message'].split('\n', 1)[0]
+                'committer_name': r['commit']['committer']['name'],
+                'committer_login': r['committer']['login'],
+                'committer_id': r['committer']['id'],
+                'message': r['commit']['message'].split('\n', 1)[0]
             })
 
         return retval
