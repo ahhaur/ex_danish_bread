@@ -88,9 +88,8 @@ class RepoReader:
 
                 if conn is not None:
                     retval.append(tuple(tmp.values()))
-                    print(tmp, "\n", "-"*50)
-                else:
-                    print(tmp, "\n", "-"*50)
+
+                # print(tmp, "\n", "-"*50)
             
             if conn is not None:
                 conn.insert_batch('commit_table', col, retval)
